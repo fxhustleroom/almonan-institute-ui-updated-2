@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { --bg: #F7F5EE; }
+
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: #1A1A1A;
+}
+
+.card {
+  @apply rounded-xl2 border border-black/5 bg-white shadow-soft;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-lg bg-almonanGreen-500 px-5 py-3 text-sm font-semibold text-white shadow-soft hover:bg-almonanGreen-700 transition;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-lg bg-almonanBrown-700 px-5 py-3 text-sm font-semibold text-white shadow-soft hover:bg-almonanBrown-900 transition;
+}
+
+.btn-outline {
+  @apply inline-flex items-center justify-center rounded-lg border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-ink hover:bg-black/5 transition;
+}
+
+.section-brown {
+  @apply rounded-xl2 bg-almonanBrown-700 text-white;
+}
+
+.section-mint {
+  @apply rounded-xl2 bg-almonanGreen-100;
+}
+
+.h1 {
+  @apply text-4xl md:text-5xl font-extrabold tracking-tight;
+}
+
+.h2 {
+  @apply text-2xl md:text-3xl font-extrabold tracking-tight;
+}
+
+.muted {
+  @apply text-black/60;
+}
