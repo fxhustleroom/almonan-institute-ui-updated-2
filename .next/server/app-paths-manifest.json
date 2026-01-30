@@ -1,9 +1,3 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/(auth)/login/page": "app/(auth)/login/page.js",
-  "/student/profile/page": "app/student/profile/page.js",
-  "/student/dashboard/page": "app/student/dashboard/page.js",
-  "/student/my-courses/page": "app/student/my-courses/page.js",
-  "/student/qna/page": "app/student/qna/page.js",
-  "/student/quizzes/page": "app/student/quizzes/page.js"
+  "/student/dashboard/page": "app/student/dashboard/page.js"
 }
