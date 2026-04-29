@@ -11,38 +11,65 @@ body {
   color: #1A1A1A;
 }
 
-.card {
-  @apply rounded-xl2 border border-black/5 bg-white shadow-soft;
+@layer utilities {
+  .rounded-xl2 { border-radius: 1rem; }
 }
 
-.btn-primary {
-  @apply inline-flex items-center justify-center rounded-lg bg-almonanGreen-500 px-5 py-3 text-sm font-semibold text-white shadow-soft hover:bg-almonanGreen-700 transition;
+@layer components {
+  .shadow-soft {
+    box-shadow:
+      0 12px 28px rgba(0,0,0,0.06),
+      0 2px 8px rgba(0,0,0,0.04);
+  }
+
+  .card {
+    @apply rounded-xl2 border border-black/5 bg-white shadow-soft;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none
+      focus:border-green-600 focus:ring-4 focus:ring-green-600/15;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl bg-green-600
+      px-5 py-3 text-sm font-semibold text-white shadow-soft
+      hover:bg-green-700 transition;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl bg-stone-800
+      px-5 py-3 text-sm font-semibold text-white shadow-soft
+      hover:bg-stone-900 transition;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center rounded-xl border border-black/10 bg-white
+      px-5 py-3 text-sm font-semibold text-black hover:bg-black/5 transition;
+  }
+
+  /* Sections */
+  .section-brown { @apply rounded-xl2 bg-stone-800 text-white; }
+  .section-mint  { @apply rounded-xl2 bg-green-50; }
+
+  /* Headings */
+  .h1 { @apply text-4xl md:text-5xl font-extrabold tracking-tight; }
+  .h2 { @apply text-2xl md:text-3xl font-extrabold tracking-tight; }
+  .muted { @apply text-black/60; }
+
+  /* Aliases used in TSX */
+  .bg-brand { @apply bg-green-600; }
+  .text-brand { @apply text-green-700; }
+  .border-brand { @apply border-green-600; }
+  .accent-brand { accent-color: #16a34a; }
+
+  .bg-green { @apply bg-green-600; }
+  .text-green { @apply text-green-700; }
+  .border-green { @apply border-green-600; }
+  .accent-green { accent-color: #16a34a; }
+
+  .text-ink { @apply text-black; }
 }
 
-.btn-secondary {
-  @apply inline-flex items-center justify-center rounded-lg bg-almonanBrown-700 px-5 py-3 text-sm font-semibold text-white shadow-soft hover:bg-almonanBrown-900 transition;
-}
-
-.btn-outline {
-  @apply inline-flex items-center justify-center rounded-lg border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-ink hover:bg-black/5 transition;
-}
-
-.section-brown {
-  @apply rounded-xl2 bg-almonanBrown-700 text-white;
-}
-
-.section-mint {
-  @apply rounded-xl2 bg-almonanGreen-100;
-}
-
-.h1 {
-  @apply text-4xl md:text-5xl font-extrabold tracking-tight;
-}
-
-.h2 {
-  @apply text-2xl md:text-3xl font-extrabold tracking-tight;
-}
-
-.muted {
-  @apply text-black/60;
-}
+a { @apply text-inherit; }

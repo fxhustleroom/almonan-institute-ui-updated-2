@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthLayout } from '@/components/AuthLayout';
@@ -26,19 +26,17 @@ export default function LoginPage() {
     try {
       const data = await login({ emailOrPhone, password });
 
-      // store tokens + user
       setAuth({
         tokens: { accessToken: data.accessToken, refreshToken: data.refreshToken },
         user: data.user
       });
 
-      // redirect by role
       const role = String(data.user?.role || '').toLowerCase();
       if (role.includes('admin')) router.push('/admin');
       else if (role.includes('staff')) router.push('/staff');
-      else router.push('/student/profile');
+      else router.push('/student/dashboard');
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || 'Login failed. Please check your credentials.');
+      setError(err?.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
@@ -75,7 +73,6 @@ export default function LoginPage() {
                   Forgot password?
                 </Link>
               </div>
-
               <div className="relative">
                 <input
                   value={password}

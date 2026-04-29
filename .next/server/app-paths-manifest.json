@@ -1,3 +1,8 @@
 {
-  "/student/dashboard/page": "app/student/dashboard/page.js"
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(public)/page": "app/(public)/page.js",
+  "/(public)/support/page": "app/(public)/support/page.js",
+  "/(public)/courses/page": "app/(public)/courses/page.js",
+  "/(public)/library/page": "app/(public)/library/page.js",
+  "/(public)/bookstore/page": "app/(public)/bookstore/page.js"
 }

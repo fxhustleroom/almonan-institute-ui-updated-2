@@ -1,4 +1,4 @@
-// File: C:\Users\user\Downloads\almonan-institute-ui-updated-2\app\student\layout.tsx
+// File: C:\Users\user\Downloads\Almonan-Project\almonan-institute-ui-updated-2\app\student\layout.tsx
 import * as entry from '../../../../app/student/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

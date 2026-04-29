@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import { Logo } from '@/components/Logo';
 import { useAuth } from '@/components/AuthProvider';
@@ -9,20 +9,19 @@ import { useAuth } from '@/components/AuthProvider';
 type NavItem = {
   href: string;
   label: string;
-  group?: 'student' | 'learning';
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/student/dashboard', label: 'Dashboard', group: 'student' },
-  { href: '/student/my-courses', label: 'My Courses', group: 'student' },
-  { href: '/student/qna', label: 'Q&A', group: 'learning' },
-  { href: '/student/quizzes', label: 'Quizzes', group: 'learning' },
-  { href: '/student/assignments', label: 'Assignments', group: 'learning' },
-  { href: '/student/exams', label: 'Exams', group: 'learning' },
-  { href: '/student/certificates', label: 'Certificates', group: 'student' },
-  { href: '/student/library', label: 'Library', group: 'student' },
-  { href: '/student/support', label: 'Support', group: 'student' },
-  { href: '/student/settings', label: 'Settings', group: 'student' },
+  { href: '/student/dashboard', label: 'Dashboard' },
+  { href: '/student/my-courses', label: 'My Courses' },
+  { href: '/student/qna', label: 'Q&A' },
+  { href: '/student/quizzes', label: 'Quizzes' },
+  { href: '/student/assignments', label: 'Assignments' },
+  { href: '/student/exams', label: 'Exams' },
+  { href: '/student/certificates', label: 'Certificates' },
+  { href: '/student/library', label: 'Library' },
+  { href: '/student/support', label: 'Support' },
+  { href: '/student/settings', label: 'Settings' },
 ];
 
 function cn(...classes: Array<string | false | undefined | null>) {
@@ -38,9 +37,7 @@ function SideNavItem({ href, label }: { href: string; label: string }) {
       href={href}
       className={cn(
         'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition',
-        active
-          ? 'bg-brand text-white shadow-soft'
-          : 'text-ink/80 hover:bg-white/70 hover:text-ink'
+        active ? 'bg-green-600 text-white shadow-soft' : 'text-ink/80 hover:bg-white/70 hover:text-ink'
       )}
     >
       <span className="h-2 w-2 rounded-full bg-current opacity-70" />
@@ -51,27 +48,26 @@ function SideNavItem({ href, label }: { href: string; label: string }) {
 
 export function StudentShell({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
+  const router = useRouter();
   const pathname = usePathname();
 
   const title = useMemo(() => {
-    if (pathname.startsWith('/my-courses')) return 'Courses';
-    if (pathname.startsWith('/qna')) return 'Q&A';
-    if (pathname.startsWith('/quizzes')) return 'Quizzes';
-    if (pathname.startsWith('/library')) return 'Library';
-    if (pathname.startsWith('/support')) return 'Support';
+    if (pathname.startsWith('/student/my-courses')) return 'Courses';
+    if (pathname.startsWith('/student/qna')) return 'Q&A';
+    if (pathname.startsWith('/student/quizzes')) return 'Quizzes';
+    if (pathname.startsWith('/student/library')) return 'Library';
+    if (pathname.startsWith('/student/support')) return 'Support';
+    if (pathname.startsWith('/student/settings')) return 'Settings';
     return 'Dashboard';
   }, [pathname]);
 
   return (
     <div className="min-h-screen bg-canvas">
-      {/* Top bar (matches the UI screenshots: logo + search + quick links + user) */}
       <header className="sticky top-0 z-40 border-b border-line/60 bg-canvas/80 backdrop-blur">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-4">
           <div className="flex items-center gap-3">
             <Logo />
-            <div className="hidden text-sm font-semibold text-ink/70 sm:block">
-              Student Portal
-            </div>
+            <div className="hidden text-sm font-semibold text-ink/70 sm:block">Student Portal</div>
           </div>
 
           <div className="hidden w-full max-w-xl items-center gap-2 rounded-2xl border border-line bg-white px-4 py-3 shadow-soft md:flex">
@@ -102,14 +98,13 @@ export function StudentShell({ children }: { children: React.ReactNode }) {
                 <div className="font-semibold text-ink">{user?.fullName ?? 'Student'}</div>
                 <div className="text-ink/60">{title}</div>
               </div>
-              <div className="h-11 w-11 rounded-full bg-white shadow-soft ring-2 ring-brand/20" />
+              <div className="h-11 w-11 rounded-full bg-white shadow-soft ring-2 ring-green-600/20" />
             </div>
           </div>
         </div>
       </header>
 
       <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 px-4 py-8 lg:grid-cols-[280px,1fr]">
-        {/* Sidebar */}
         <aside className="hidden lg:block">
           <div className="sticky top-[96px] space-y-4">
             <div className="rounded-2xl border border-line bg-white/60 p-4 shadow-soft">
@@ -122,7 +117,10 @@ export function StudentShell({ children }: { children: React.ReactNode }) {
 
               <div className="mt-4 border-t border-line/60 pt-4">
                 <button
-                  onClick={logout}
+                  onClick={() => {
+                    logout();
+                    router.push('/login');
+                  }}
                   className="w-full rounded-xl border border-line bg-white px-4 py-3 text-left text-sm font-medium text-ink/70 shadow-soft hover:bg-white"
                 >
                   Log out
@@ -132,29 +130,8 @@ export function StudentShell({ children }: { children: React.ReactNode }) {
           </div>
         </aside>
 
-        {/* Content */}
         <main>{children}</main>
       </div>
-
-      <footer className="border-t border-line/60 bg-canvas py-8">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 text-sm text-ink/60 sm:flex-row">
-          <div className="flex items-center gap-2">
-            <span className="opacity-60">©</span>
-            <span>2024 Almonan Institute Academic Services</span>
-          </div>
-          <div className="flex items-center gap-6">
-            <a className="hover:text-ink" href="#">
-              Privacy Policy
-            </a>
-            <a className="hover:text-ink" href="#">
-              Terms of Service
-            </a>
-            <a className="hover:text-ink" href="#">
-              Campus Map
-            </a>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
