@@ -16,12 +16,16 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+
+    "ignoreDeprecations": "6.0",
+
     "baseUrl": ".",
     "paths": {
       "@/*": [
         "./*"
       ]
     },
+
     "esModuleInterop": true,
     "plugins": [
       {

@@ -16,7 +16,7 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     setError(null);
     try {
-      await requestPasswordReset({ identifier });
+      await requestPasswordReset({ emailOrPhone: identifier });
       setDone(true);
     } catch (e: any) {
       setError(e?.response?.data?.message || e?.message || 'Request failed.');

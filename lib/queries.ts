@@ -1,27 +1,15 @@
-import { api } from '@/lib/api';
-import type { Book, Course, Product, SupportTicketInput } from '@/lib/types';
+import { api } from './api';
+import type { Book, Course, Product, SupportTicketInput } from './types';
 
-// Helper: support both { success, data } and direct response bodies
 function unwrap<T>(res: any): T {
   return (res?.data?.data ?? res?.data ?? res) as T;
 }
 
-// -----------------------
 // Public
-// -----------------------
-
-export async function fetchPublicCourses(params?: {
-  q?: string;
-  category?: string;
-  price?: 'free' | 'paid' | 'all';
-  page?: number;
-}) {
+export async function fetchPublicCourses(params?: { q?: string; category?: string; price?: 'free' | 'paid' | 'all'; page?: number }) {
   const res = await api.get('/public/courses', { params });
   const data = unwrap<Course[] | { items: Course[] }>(res);
-
-  // Some APIs return { items: [] }
-  if (Array.isArray(data)) return data;
-  return Array.isArray((data as any)?.items) ? (data as any).items : [];
+  return Array.isArray(data) ? data : Array.isArray((data as any)?.items) ? (data as any).items : [];
 }
 
 export async function fetchPublicCourse(courseId: string) {
@@ -32,15 +20,13 @@ export async function fetchPublicCourse(courseId: string) {
 export async function fetchLibraryBooks(params?: { q?: string; category?: string }) {
   const res = await api.get('/library/books', { params });
   const data = unwrap<Book[] | { items: Book[] }>(res);
-  if (Array.isArray(data)) return data;
-  return Array.isArray((data as any)?.items) ? (data as any).items : [];
+  return Array.isArray(data) ? data : Array.isArray((data as any)?.items) ? (data as any).items : [];
 }
 
 export async function fetchBookstoreProducts(params?: { q?: string; category?: string; page?: number }) {
   const res = await api.get('/bookstore/products', { params });
   const data = unwrap<Product[] | { items: Product[] }>(res);
-  if (Array.isArray(data)) return data;
-  return Array.isArray((data as any)?.items) ? (data as any).items : [];
+  return Array.isArray(data) ? data : Array.isArray((data as any)?.items) ? (data as any).items : [];
 }
 
 export async function createSupportTicket(payload: SupportTicketInput) {
@@ -48,11 +34,9 @@ export async function createSupportTicket(payload: SupportTicketInput) {
   return unwrap(res);
 }
 
-// -----------------------
 // Auth
-// -----------------------
-
 export type LoginPayload = { emailOrPhone: string; password: string };
+
 export type AuthUser = {
   id: string;
   fullName: string;
@@ -60,7 +44,12 @@ export type AuthUser = {
   phone?: string | null;
   role: string;
 };
-export type LoginResponse = { accessToken: string; refreshToken: string; user: AuthUser };
+
+export type LoginResponse = {
+  accessToken: string;
+  refreshToken: string;
+  user: AuthUser;
+};
 
 export async function login(payload: LoginPayload) {
   const res = await api.post('/auth/login', payload);
@@ -69,7 +58,9 @@ export async function login(payload: LoginPayload) {
 
 export type RegisterOnlinePayload = {
   fullName: string;
-  emailOrPhone: string;
+  emailOrPhone?: string;
+  email?: string;
+  phone?: string;
   password: string;
   confirmPassword?: string;
   agreeToTerms: boolean;
@@ -94,15 +85,19 @@ export async function registerOffline(payload: RegisterOfflinePayload) {
   return unwrap(res);
 }
 
+export async function register(payload: RegisterOnlinePayload | RegisterOfflinePayload | any) {
+  if ('matricNumber' in payload || 'department' in payload || 'level' in payload) {
+    return registerOffline(payload);
+  }
+  return registerOnline(payload);
+}
+
 export async function requestPasswordReset(payload: { emailOrPhone: string }) {
   const res = await api.post('/auth/password/forgot', payload);
   return unwrap(res);
 }
 
-// -----------------------
 // Me / Profile
-// -----------------------
-
 export type MeResponse = {
   id: string;
   fullName: string;
@@ -122,7 +117,6 @@ export async function fetchMe() {
   return unwrap<MeResponse>(res);
 }
 
-// aliases (your profile page imports these names)
 export const me = fetchMe;
 
 export async function updateMe(payload: { fullName?: string; email?: string; phone?: string; bio?: string }) {
@@ -151,15 +145,13 @@ export async function updatePrivacy(payload: { profileVisible: boolean }) {
   return unwrap<MeResponse>(res);
 }
 
-// Avatar upload: presign -> PUT -> notify API
-export type PresignResponse = { uploadId: string; uploadUrl: string; publicUrl: string };
+export type PresignResponse = {
+  uploadId: string;
+  uploadUrl: string;
+  publicUrl: string;
+};
 
-export async function presignUpload(payload: {
-  filename: string;
-  contentType: string;
-  sizeBytes: number;
-  purpose?: string;
-}) {
+export async function presignUpload(payload: { filename: string; contentType: string; sizeBytes: number; purpose?: string }) {
   const res = await api.post('/uploads/presign', payload);
   return unwrap<PresignResponse>(res);
 }
@@ -169,13 +161,9 @@ export async function setAvatar(payload: { uploadId: string; url: string }) {
   return unwrap<MeResponse>(res);
 }
 
-// alias (your profile page imports updateMeAvatar)
 export const updateMeAvatar = setAvatar;
 
-// -----------------------
 // Student dashboard + learning
-// -----------------------
-
 export type DashboardStats = {
   activeCourses: number;
   pendingAssignments: number;
@@ -188,23 +176,29 @@ export type ActivityItem = {
   type: string;
   title: string;
   subtitle?: string;
-  createdAt: string;
+  createdAt?: string;
+  timestamp?: string;
 };
 
 export type CourseProgress = {
   courseId: string;
   courseTitle: string;
-  progressPercent: number;
+  progressPercent?: number;
+  percent?: number;
+};
+
+export type DashboardResponse = {
+  stats: DashboardStats;
+  recentActivity: ActivityItem[];
+  courseProgress: CourseProgress[];
 };
 
 export async function fetchStudentDashboard() {
   const res = await api.get('/me/dashboard');
-  return unwrap(res) as {
-    stats: DashboardStats;
-    recentActivity: ActivityItem[];
-    courseProgress: CourseProgress[];
-  };
+  return unwrap(res) as DashboardResponse;
 }
+
+export const fetchDashboard = fetchStudentDashboard;
 
 export type EnrolledCourseCard = {
   id: string;
@@ -219,14 +213,30 @@ export type EnrolledCourseCard = {
 export async function fetchMyEnrolledCourses(params?: { q?: string }) {
   const res = await api.get('/courses/enrolled', { params });
   const data = unwrap<EnrolledCourseCard[] | { items: EnrolledCourseCard[] }>(res);
-  if (Array.isArray(data)) return data;
-  return Array.isArray((data as any)?.items) ? (data as any).items : [];
+  return Array.isArray(data) ? data : Array.isArray((data as any)?.items) ? (data as any).items : [];
 }
 
-// -----------------------
-// Assignments
-// -----------------------
+export const fetchMyCourses = fetchMyEnrolledCourses;
 
+export type CourseOutline = any;
+export type Lesson = any;
+
+export async function fetchCourseDetails(courseId: string) {
+  const res = await api.get(`/courses/${courseId}`);
+  return unwrap(res);
+}
+
+export async function fetchCourseOutline(courseId: string) {
+  const res = await api.get(`/courses/${courseId}/outline`);
+  return unwrap(res);
+}
+
+export async function fetchLesson(courseId: string, lessonId: string) {
+  const res = await api.get(`/courses/${courseId}/lessons/${lessonId}`);
+  return unwrap(res);
+}
+
+// Assignments
 export type AssignmentStatus = 'pending' | 'submitted' | 'late' | string;
 
 export type MyAssignment = {
@@ -235,7 +245,7 @@ export type MyAssignment = {
   courseCode?: string;
   section?: string;
   title: string;
-  dueDate?: string; // ISO string preferred
+  dueDate?: string;
   status: AssignmentStatus;
 };
 
@@ -244,7 +254,7 @@ export type AssignmentDetails = {
   courseTitle?: string;
   moduleTitle?: string;
   title: string;
-  dueDate?: string; // ISO
+  dueDate?: string;
   pointsPossible?: number;
   status?: AssignmentStatus;
 };
@@ -252,21 +262,15 @@ export type AssignmentDetails = {
 export async function fetchMyAssignments() {
   const res = await api.get('/assignments/my');
   const data = unwrap<MyAssignment[] | { items: MyAssignment[] }>(res);
-  if (Array.isArray(data)) return data;
-  return Array.isArray((data as any)?.items) ? (data as any).items : [];
+  return Array.isArray(data) ? data : Array.isArray((data as any)?.items) ? (data as any).items : [];
 }
 
 export async function fetchAssignment(assignmentId: string) {
-  // If your backend does NOT have this endpoint, we will fall back to list later.
   const res = await api.get(`/assignments/${assignmentId}`);
   return unwrap<AssignmentDetails>(res);
 }
 
-export async function submitAssignment(payload: {
-  assignmentId: string;
-  note?: string;
-  files: Array<{ uploadId: string; url: string }>;
-}) {
+export async function submitAssignment(payload: { assignmentId: string; note?: string; files: Array<{ uploadId: string; url: string }> }) {
   const res = await api.post(`/assignments/${payload.assignmentId}/submissions`, {
     note: payload.note,
     files: payload.files
@@ -274,10 +278,7 @@ export async function submitAssignment(payload: {
   return unwrap(res);
 }
 
-// -----------------------
 // Exams
-// -----------------------
-
 export type ExamStatus = 'not_started' | 'in_progress' | 'submitted' | 'graded' | string;
 
 export type ExamListItem = {
@@ -285,8 +286,8 @@ export type ExamListItem = {
   title: string;
   courseTitle?: string;
   courseSlug?: string;
-  sectionLabel?: string; // e.g. "Section B: Macroeconomic Foundations"
-  durationSeconds?: number; // e.g. 3600
+  sectionLabel?: string;
+  durationSeconds?: number;
   totalQuestions?: number;
   startsAt?: string | null;
   endsAt?: string | null;
@@ -296,45 +297,39 @@ export type ExamListItem = {
 export async function fetchMyExams(params?: { q?: string; status?: string; page?: number }) {
   const res = await api.get('/exams', { params });
   const data = unwrap<ExamListItem[] | { items: ExamListItem[] }>(res);
-  if (Array.isArray(data)) return data;
-  return Array.isArray((data as any)?.items) ? (data as any).items : [];
+  return Array.isArray(data) ? data : Array.isArray((data as any)?.items) ? (data as any).items : [];
 }
 
-// When the student starts (or resumes) an exam, backend returns an attempt
 export type ExamAttempt = {
   attemptId: string;
   examId: string;
   title: string;
-  courseBreadcrumb?: string; // e.g. "COURSES > ECONOMICS"
-  sectionLabel?: string; // e.g. "Section B: Macroeconomic Foundations"
+  courseBreadcrumb?: string;
+  sectionLabel?: string;
   totalQuestions: number;
-  currentQuestionIndex: number; // 0-based
+  currentQuestionIndex: number;
   timeRemainingSeconds: number;
-  flaggedQuestionIndexes?: number[]; // 0-based
-  answers?: Record<string, string | null>; // questionId -> optionId
+  flaggedQuestionIndexes?: number[];
+  answers?: Record<string, string | null>;
   questions: Array<{
     id: string;
-    index: number; // 1-based for display
+    index: number;
     prompt: string;
     options: Array<{ id: string; text: string }>;
   }>;
 };
 
 export async function startOrResumeExam(examId: string) {
-  // Common patterns: POST /exams/:id/start or /exams/:id/attempt
-  // If your backend differs, adjust this one line.
   const res = await api.post(`/exams/${examId}/start`, {});
   return unwrap<ExamAttempt>(res);
 }
 
 export async function fetchExamAttempt(examId: string) {
-  // Common pattern: GET /exams/:id/attempt
   const res = await api.get(`/exams/${examId}/attempt`);
   return unwrap<ExamAttempt>(res);
 }
 
 export async function saveExamAnswer(payload: { examId: string; questionId: string; optionId: string | null }) {
-  // Common pattern: POST /exams/:id/answer
   const res = await api.post(`/exams/${payload.examId}/answer`, {
     questionId: payload.questionId,
     optionId: payload.optionId
@@ -343,26 +338,43 @@ export async function saveExamAnswer(payload: { examId: string; questionId: stri
 }
 
 export async function toggleExamFlag(payload: { examId: string; questionIndex: number; flagged: boolean }) {
-  // Common pattern: POST /exams/:id/flag
   const res = await api.post(`/exams/${payload.examId}/flag`, payload);
   return unwrap(res);
 }
 
 export async function submitExam(payload: { examId: string }) {
-  // Common pattern: POST /exams/:id/submit
   const res = await api.post(`/exams/${payload.examId}/submit`, {});
   return unwrap(res);
 }
 
-// -----------------------
-// Certificates
-// -----------------------
+export const fetchQuizAttempt = fetchExamAttempt;
 
+export async function submitQuizAnswer(payload: { quizId?: string; examId?: string; questionId: string; optionId: string | null }) {
+  return saveExamAnswer({
+    examId: payload.examId || payload.quizId || '',
+    questionId: payload.questionId,
+    optionId: payload.optionId
+  });
+}
+
+export async function finalizeQuizAttempt(payload: { quizId?: string; examId?: string }) {
+  return submitExam({
+    examId: payload.examId || payload.quizId || ''
+  });
+}
+
+// QNA
+export async function fetchQnaThreads(moduleId: string) {
+  const res = await api.get(`/qna/modules/${moduleId}/threads`);
+  return unwrap(res);
+}
+
+// Certificates
 export type CertificateItem = {
   id: string;
   title: string;
   courseTitle?: string | null;
-  issuedAt?: string | null; // ISO date
+  issuedAt?: string | null;
   pdfUrl?: string | null;
   previewUrl?: string | null;
   status?: 'verified' | 'pending' | string;
@@ -370,7 +382,7 @@ export type CertificateItem = {
 
 export type CertificatesStats = {
   totalEarned: number;
-  latestAwardDate?: string | null; // ISO date
+  latestAwardDate?: string | null;
   gpaEquivalent?: number | null;
   creditsValid?: number | null;
 };
@@ -381,39 +393,34 @@ export type CertificatesResponse = {
 };
 
 export async function fetchMyCertificates(params?: { q?: string; page?: number }) {
-  // Preferred pattern: /me/...
   const res = await api.get('/me/certificates', { params });
   const data = unwrap<CertificatesResponse | CertificateItem[] | { items: CertificateItem[]; stats?: CertificatesStats }>(res);
 
   if (Array.isArray(data)) return { items: data, stats: undefined } as CertificatesResponse;
+
   const items = Array.isArray((data as any)?.items) ? (data as any).items : [];
   const stats = (data as any)?.stats;
+
   return { items, stats } as CertificatesResponse;
 }
 
 export async function downloadCertificatesBundle() {
-  // Backend should return a URL or a file stream.
-  // If it returns { url }, we open it in the UI.
   const res = await api.post('/me/certificates/bundle');
   return unwrap<{ url?: string }>(res);
 }
 
 export async function shareCertificates(payload: { certificateIds: string[] }) {
-  // Backend can return a share link { url }
   const res = await api.post('/me/certificates/share', payload);
   return unwrap<{ url?: string }>(res);
 }
 
-// -----------------------
 // Settings
-// -----------------------
-
 export type StudentSettings = {
   notificationsEmail?: boolean;
   notificationsSms?: boolean;
   announcements?: boolean;
   examReminders?: boolean;
-  darkMode?: boolean; // if you support it later
+  darkMode?: boolean;
 };
 
 export async function fetchMySettings() {
